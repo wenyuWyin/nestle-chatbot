@@ -16,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useChat } from '../contexts/ChatContext';
-import { ChatService } from './services/ChatService';
+import { sendMessage } from '../api/ChatService';
 
 
 const MessageBubble = ({ message }) => (
@@ -102,7 +102,12 @@ const ChatPanel = ({ onClose }) => {
         //TODO
         try {
             // API CALL POINT - Replace with real implementation
-            const botResponse = await ChatService.sendMessage(input);
+            const response = await sendMessage(input);
+            const botResponse = {
+                text: response.response,
+                isUser: false,
+                timestamp: new Date()
+            }
             addMessage(botResponse);
         } catch (error) {
             addMessage({

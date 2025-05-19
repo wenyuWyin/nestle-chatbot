@@ -1,0 +1,16 @@
+flask
+flask-cors
+
+python-dotenv
+azure-storage-blob
+requests
+beautifulsoup4
+tiktoken
+
+crawlee
+playwright
+# azure-search-documents>=11.4.0
+# azure-cosmos>=4.2.0
+# openai>=0.28.0
+# lxml>=4.6.3
+# python-dateutil>=2.8.2
