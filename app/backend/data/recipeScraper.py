@@ -1,13 +1,16 @@
 import asyncio
 import re
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
+from crawlee.storages import Dataset
 from datetime import datetime, timezone
 
-async def main() -> None:
+
+async def scrape_recipes() -> None:
     crawler = PlaywrightCrawler(
         headless=True,  # Set to True for production
-        max_requests_per_crawl=3,  # Adjust as needed
+        max_requests_per_crawl=10,  # Adjust as needed
     )
+    dataset = await Dataset.open(name='recipes')
 
     @crawler.router.default_handler
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
@@ -30,7 +33,7 @@ async def main() -> None:
             }
             
             for field, selector in selectors.items():
-                locator = context.page.locator(selector)
+                locator = context.page.locator(selector).first
                 content = await locator.text_content() if await locator.count() > 0 else None
                 # Remove special chars
                 content = re.sub(r'[.\n⇆]', '', content) if content else None
@@ -72,8 +75,8 @@ async def main() -> None:
             recipe_data['url'] = url
             recipe_data['scraped_at'] = datetime.now(timezone.utc).isoformat()
             
-        #     await context.push_data(recipe_data)
-        #     context.log.info(f'Successfully scraped: {title}')
+            await dataset.push_data(recipe_data)
+            context.log.info(f'Successfully scraped: {title}')
 
         else:  # Main page or category page
             # Enqueue recipe links
@@ -81,9 +84,12 @@ async def main() -> None:
                 selector='a[href*="/recipe/"]',
                 label='DETAIL'
             )
+        
 
     # Start with the main recipes page
-    await crawler.run(['https://www.madewithnestle.ca/recipes'])
+    await crawler.run([
+        'https://www.madewithnestle.ca/recipes',
+    ])
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(scrape_recipes())
