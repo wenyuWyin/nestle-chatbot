@@ -1,6 +1,6 @@
 import asyncio
-from recipeScraper import scrape_recipes
-from productScraper import scrape_products
+from app.backend.data.recipe_scraper import scrape_recipes
+from app.backend.data.product_scraper import scrape_products
 
 async def main():
     # Run recipe scraper first
