@@ -1,16 +1,15 @@
 import asyncio
 import re
+import pathlib
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
-from crawlee.storages import Dataset
 from datetime import datetime, timezone
 
 
 async def scrape_recipes() -> None:
     crawler = PlaywrightCrawler(
         headless=True,  # Set to True for production
-        max_requests_per_crawl=10,  # Adjust as needed
+        # max_requests_per_crawl=10,  # Adjust as needed
     )
-    dataset = await Dataset.open(name='recipes')
 
     @crawler.router.default_handler
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
@@ -75,21 +74,35 @@ async def scrape_recipes() -> None:
             recipe_data['url'] = url
             recipe_data['scraped_at'] = datetime.now(timezone.utc).isoformat()
             
-            await dataset.push_data(recipe_data)
+            await context.push_data(recipe_data)
             context.log.info(f'Successfully scraped: {title}')
 
-        else:  # Main page or category page
-            # Enqueue recipe links
-            await context.enqueue_links(
-                selector='a[href*="/recipe/"]',
-                label='DETAIL'
-            )
+        else: # Recipes list page
+
+            # Check for 'load' button
+            more_button = context.page.locator('a.button[href*="page="]')
+            if await more_button.count() > 0:
+                    await context.enqueue_links(
+                        selector='a.button[href*="page="]',
+                        label='LISTING'
+                    )
+                    context.log.info('Enqueued next page')
+
+            if context.request.label == 'LISTING':  # no need to scrape the initial page
+                # Enqueue recipe links
+                await context.enqueue_links(
+                    selector='a[href*="/recipe/"]',
+                    label='DETAIL'
+                )
         
 
     # Start with the main recipes page
     await crawler.run([
         'https://www.madewithnestle.ca/recipes',
     ])
+
+    output_path = pathlib.Path('storage/datasets') / 'recipes.json'
+    await crawler.export_data_json(path=str(output_path))
 
 if __name__ == '__main__':
     asyncio.run(scrape_recipes())

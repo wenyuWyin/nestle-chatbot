@@ -4,9 +4,9 @@ from productScraper import scrape_products
 
 async def main():
     # Run recipe scraper first
-    # print("Starting recipe scraping...")
-    # await scrape_recipes()
-    # print("Recipe scraping completed!")
+    print("Starting recipe scraping...")
+    await scrape_recipes()
+    print("Recipe scraping completed!")
     
     # Then run product scraper
     print("Starting product scraping...")

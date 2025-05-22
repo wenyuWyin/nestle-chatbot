@@ -1,7 +1,7 @@
 import asyncio
 import re
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
-from crawlee.storages import Dataset
+import pathlib
 from datetime import datetime, timezone
 
 
@@ -47,7 +47,6 @@ async def scrape_products() -> None:
         headless=True,  # Set to True for production
         max_requests_per_crawl=50,  # Adjust as needed
     )
-    dataset = await Dataset.open(name='products')
 
     @crawler.router.default_handler
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
@@ -65,7 +64,8 @@ async def scrape_products() -> None:
             brand_category = await scrape_category(context)
         
             # Save to dataset
-            await dataset.push_data(brand_category)
+            await context.push_data(brand_category)
+
             
             # # Enqueue all brand links
             # all_brands = [
@@ -91,6 +91,9 @@ async def scrape_products() -> None:
     await crawler.run([
         'https://www.madewithnestle.ca',
     ])
+
+    output_path = pathlib.Path('storage/datasets') / 'products.json'
+    await crawler.export_data_json(path=str(output_path))
 
 if __name__ == '__main__':
     asyncio.run(scrape_products())
