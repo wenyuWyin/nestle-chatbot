@@ -4,7 +4,7 @@ from flask_cors import CORS
 from config import Config
 from services.azure_search_service import AzureSearchService
 from services.openai_service import OpenAIService
-from services.ai_chat_service import HuggingFaceService
+from data.run_scrape import main as run_scrape
 from services.utils.recipe_search_util import (
     initialize_recipe_index,
     update_recipe_index_data,
@@ -26,8 +26,6 @@ def create_app():
     openai_api_endpoint = app.config["OPENAI_API_ENDPOINT"]
     openai_api_version = app.config["OPENAI_API_VERSION"]
 
-    hf_token = app.config["HF_TOKEN"]
-
     # JSON file path
     recipe_filepath = pathlib.Path(app.config["OUTPUT_FILEPATH"]) / "recipes.json"
 
@@ -46,18 +44,20 @@ def create_app():
         api_version=openai_api_version,
     )
     print("Azure OpenAI Client created successfully")
-    chat_service = HuggingFaceService(token=hf_token)
-    print("HuggingFace Chat Client created successfully")
+
+    # Rescrape the data
+    run_scrape()
+    print("Data scraping is done successfully")
     # initialize_recipe_index(
     #     search_service=search_service,
     #     file_path=recipe_filepath,
     #     embedding_service=embedding_service,
     # )
-    # update_recipe_index_data(
-    #     search_service=search_service,
-    #     file_path=recipe_filepath,
-    #     embedding_service=embedding_service,
-    # )
+    update_recipe_index_data(
+        search_service=search_service,
+        file_path=recipe_filepath,
+        embedding_service=embedding_service,
+    )
 
     # Enable CORS
     CORS(app, origins=app.config["CORS_ORIGINS"], methods=app.config["CORS_METHODS"])
@@ -72,7 +72,6 @@ def create_app():
             response = recipe_search(
                 search_service=search_service,
                 openai_client=embedding_service,
-                chat_client=chat_service,
                 query=data["message"],
                 citation=False,
             )

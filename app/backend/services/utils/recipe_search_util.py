@@ -13,7 +13,6 @@ from azure.search.documents.indexes.models import (
 )
 from ..azure_search_service import AzureSearchService
 from ..openai_service import OpenAIService
-from ..ai_chat_service import HuggingFaceService
 from .data_prep import prepare_recipe_docs
 
 
@@ -154,7 +153,7 @@ def update_recipe_index_data(
 
     print("\nUpdates complete!")
 
-def recipe_search(search_service: AzureSearchService, openai_client: OpenAIService, chat_client: HuggingFaceService, query: str, citation: bool = True):
+def recipe_search(search_service: AzureSearchService, openai_client: OpenAIService, query: str, citation: bool = True):
     query_embedding = openai_client.generate_embedding(query)
 
     print("starting searching")
@@ -175,7 +174,7 @@ def recipe_search(search_service: AzureSearchService, openai_client: OpenAIServi
         
         print("start generate response")
         
-        return chat_client.generate_response(user_query=query, context=context, citation=citation)
+        return openai_client.generate_response(user_query=query, context=context, citation=citation)
     
     return "Sorry, I couldn't find matching recipes. Try different keywords."
 
