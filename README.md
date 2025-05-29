@@ -61,6 +61,18 @@ config.py             # Configuration settings
 - Not deployed to Azure (local development only)
 
 ## Future Enhancements
-- Implement GraphRAG module with Neo4j/Cosmos DB
+- Integrate OpenAI GPT model for generative responses
+  - Use paid gpt-3.5-turbo or gpt-4 to generate dynamic responses from retrieved Azure Search content
+- Implement GraphRAG module with Cosmos DB
+  - Schema Design
+    ```mermaid
+    graph TD
+    A[Category] --> B[Brand]
+    B --> C[Product]
+    C --> D[Ingredients]
+    C --> E[Nutrition_Info]
+    ```
 - Deploy to Azure App Service
+  - Containerize Flask with Docker
+  - Deploy to Azure App Service with CI/CD
 - Expand scraping to full website content
