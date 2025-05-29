@@ -1,5 +1,4 @@
 from openai import AzureOpenAI
-from azure.core.credentials import AzureKeyCredential
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 
