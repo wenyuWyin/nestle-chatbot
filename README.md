@@ -72,6 +72,26 @@ config.py             # Configuration settings
     C --> D[Ingredients]
     C --> E[Nutrition_Info]
     ```
+  - Graph Database Structure
+    - Nodes:
+    ```typescript
+    {
+      "id": "nestle-001",
+      "label": "Product",
+      "name": "KITKAT Tablet Salted Caramel",
+      "brand": "KitKat",
+      "category": "Chocolate & Treats",
+      "attributes": {
+        "ingredients": ["cocoa", "sugars"],
+        "nutrition": {"calories": 230}
+      }
+    }
+    ```
+    - Relationships: BELONGS_TO, HAS_ATTRIBUTE
+  - Integration with Hybrid Search
+    1. User query → Vector search (Azure AI Search) for quick matches
+    2. Graph traversal → Contextual relationships
+    3. Merge results → Generate response with OpenAI
 - Deploy to Azure App Service
   - Containerize Flask with Docker
   - Deploy to Azure App Service with CI/CD
